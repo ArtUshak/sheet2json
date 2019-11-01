@@ -44,7 +44,7 @@ def process_i_p(input):
 
 def process_i_q(input):
     """Return quantity (i.q) from input string."""
-    return int(input)  # TODO
+    return float(input)  # TODO
 
 
 def process_i_s(input):
