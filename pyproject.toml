@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "sheet2json"
+version = "0.1.0"
+description = "Script to convert receipt data from spreadsheet format to JSON"
+authors = ["Artiom Khandamirov <t9max@yandex.ru>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pyexcel = "^0.5.15"
+pyexcel-io = "^0.5.20"
+pyexcel-xlsx = "^0.5.7"
+
+[tool.poetry.dev-dependencies]
+pylint = "^2.4"
+flake8 = "^3.7"
+pycodestyle = "^2.5"
+pydocstyle = "^4.0"
+autopep8 = "^1.4"
+bandit = "^1.6"
+rope = "^0.14.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
