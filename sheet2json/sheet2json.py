@@ -325,8 +325,6 @@ class FileTypeAction(argparse.Action):
     """Argparse action to get input file type from file name."""
 
     def __call__(self, parser, namespace, values, option_string=None):
-        """Do TODO."""
-        # TODO
         setattr(namespace, self.dest, values)
         if getattr(namespace, 'input_file_type') is not None:
             return
