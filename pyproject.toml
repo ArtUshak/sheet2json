@@ -9,6 +9,7 @@ python = "^3.7"
 pyexcel = "^0.5.15"
 pyexcel-io = "^0.5.20"
 pyexcel-xlsx = "^0.5.7"
+dnspython = "^1.16"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.4"
