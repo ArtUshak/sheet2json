@@ -317,7 +317,8 @@ def convert(input_file, input_file_type, output_file):
             't': datetime.datetime.now().isoformat(),
             'i': list(receipts.values()),
         },
-        output_file
+        output_file,
+        indent=2
     )
 
 
