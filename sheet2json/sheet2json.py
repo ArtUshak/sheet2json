@@ -139,14 +139,16 @@ def check_email_domain_mx(domain_part):
 def process_dt(input):
     """Return operation type (dt) from input string."""
     if input not in RECEIPT_DT_VALUES:
-        raise InvalidFileFormatException('Invalid dt value')
+        raise InvalidFileFormatException('Invalid dt (operation type) value')
     return input
 
 
 def process_smc(input):
     """Return calculation form (smc) from input string."""
     if input not in GOOD_SMC_VALUES:
-        raise InvalidFileFormatException('Invalid i.smc value')
+        raise InvalidFileFormatException(
+            'Invalid i.smc (calculation form) value'
+        )
     return input
 
 
@@ -162,11 +164,11 @@ def process_em(input):
     validation_results = validate_email(input)
     if validation_results is None:
         raise InvalidFileFormatException(
-            'Invalid i.em value: invalid e-mail format'
+            'Invalid i.em (e-mail address) value: invalid e-mail format'
         )
     if not check_email_domain_mx(validation_results[1]):
         raise InvalidFileFormatException(
-            'Invalid i.em value: domain name does not exist, '
+            'Invalid i.em (e-mail address) value: domain name does not exist, '
             'or does not have MX record'
         )
     return input
@@ -182,7 +184,7 @@ def process_i_p(input):
     try:
         return float(input)  # TODO
     except ValueError:
-        raise InvalidFileFormatException('Invalid i.p value')
+        raise InvalidFileFormatException('Invalid i.p (price) value')
 
 
 def process_i_q(input):
@@ -190,7 +192,7 @@ def process_i_q(input):
     try:
         return float(input)  # TODO
     except ValueError:
-        raise InvalidFileFormatException('Invalid i.q value')
+        raise InvalidFileFormatException('Invalid i.q (quantity) value')
 
 
 def process_i_s(input):
@@ -198,13 +200,13 @@ def process_i_s(input):
     try:
         return float(input)  # TODO
     except ValueError:
-        raise InvalidFileFormatException('Invalid i.s value')
+        raise InvalidFileFormatException('Invalid i.s (sum) value')
 
 
 def process_i_ts(input):
-    """Return tax (i.ts) from input string."""
+    """Return tax rate (i.ts) from input string."""
     if input not in GOOD_TS_VALUES:
-        raise InvalidFileFormatException('Invalid i.ts value')  # TODO
+        raise InvalidFileFormatException('Invalid i.ts (tax rate) value')
     return input
 
 
@@ -213,7 +215,7 @@ def process_i_tv(input):
     try:
         return float(input)  # TODO
     except ValueError:
-        raise InvalidFileFormatException('Invalid i.tv value')
+        raise InvalidFileFormatException('Invalid i.tv (tax amount) value')
 
 
 def process_i_sco(input):
