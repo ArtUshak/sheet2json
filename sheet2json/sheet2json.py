@@ -318,14 +318,17 @@ def convert(input_file, input_file_type, output_file):
             'i': list(receipts.values()),
         },
         output_file,
-        indent=2
+        indent=2,
+        ensure_ascii=False,
     )
 
 
 class FileTypeAction(argparse.Action):
     """Argparse action to get input file type from file name."""
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(
+        self, parser, namespace, values, option_string=None
+    ):  # noqa: D102
         setattr(namespace, self.dest, values)
         if getattr(namespace, 'input_file_type') is not None:
             return
