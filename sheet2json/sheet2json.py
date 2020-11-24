@@ -1,5 +1,4 @@
 """Script to convert receipt data from spreadsheet format to JSON."""
-import argparse
 import datetime
 import ipaddress
 import json
@@ -8,6 +7,7 @@ import re
 import sys
 import uuid
 
+import click
 import dns.resolver
 import pyexcel
 
@@ -96,17 +96,17 @@ def check_email_domain(domain_part):
     return False
 
 
-def validate_email(input):
+def validate_email(input_value):
     """
     Check email for validity.
 
     Return tuple of user name and domain name if it is valid,
     or `None` if it is invalid.
     """
-    if '@' not in input:
+    if '@' not in input_value:
         return None
 
-    user_part, domain_part = input.rsplit('@', 1)
+    user_part, domain_part = input_value.rsplit('@', 1)
 
     if not EMAIL_USER_REGEX.match(user_part):
         return None
@@ -136,32 +136,32 @@ def check_email_domain_mx(domain_part):
     return True  # TODO!
 
 
-def process_dt(input):
-    """Return operation type (dt) from input string."""
-    if input not in RECEIPT_DT_VALUES:
+def process_dt(input_value):
+    """Return operation type (dt) from input_value string."""
+    if input_value not in RECEIPT_DT_VALUES:
         raise InvalidFileFormatException('Invalid dt (operation type) value')
-    return input
+    return input_value
 
 
-def process_smc(input):
-    """Return calculation form (smc) from input string."""
-    if input not in GOOD_SMC_VALUES:
+def process_smc(input_value):
+    """Return calculation form (smc) from input_value string."""
+    if input_value not in GOOD_SMC_VALUES:
         raise InvalidFileFormatException(
             'Invalid i.smc (calculation form) value'
         )
-    return input
+    return input_value
 
 
-def process_ts(input):
-    """Return tax system (ts) from input string."""
+def process_ts(input_value):
+    """Return tax system (ts) from input_value string."""
     return 'OSN'  # TODO
 
 
-def process_em(input):
-    """Return e-mail address (em) from input string."""
-    if not input:
+def process_em(input_value):
+    """Return e-mail address (em) from input_value string."""
+    if not input_value:
         return ''
-    validation_results = validate_email(input)
+    validation_results = validate_email(input_value)
     if validation_results is None:
         raise InvalidFileFormatException(
             'Invalid i.em (e-mail address) value: invalid e-mail format'
@@ -171,60 +171,60 @@ def process_em(input):
             'Invalid i.em (e-mail address) value: domain name does not exist, '
             'or does not have MX record'
         )
-    return input
+    return input_value
 
 
-def process_ph(input):
-    """Return phone number (ph) from input string."""
-    return input  # TODO
+def process_ph(input_value):
+    """Return phone number (ph) from input_value string."""
+    return input_value  # TODO
 
 
-def process_i_p(input):
-    """Return price (i.p) from input string."""
+def process_i_p(input_value):
+    """Return price (i.p) from input_value string."""
     try:
-        return float(input)  # TODO
+        return float(input_value)  # TODO
     except ValueError:
         raise InvalidFileFormatException('Invalid i.p (price) value')
 
 
-def process_i_q(input):
-    """Return quantity (i.q) from input string."""
+def process_i_q(input_value):
+    """Return quantity (i.q) from input_value string."""
     try:
-        return float(input)  # TODO
+        return float(input_value)  # TODO
     except ValueError:
         raise InvalidFileFormatException('Invalid i.q (quantity) value')
 
 
-def process_i_s(input):
-    """Return sum (i.s) from input string."""
+def process_i_s(input_value):
+    """Return sum (i.s) from input_value string."""
     try:
-        return float(input)  # TODO
+        return float(input_value)  # TODO
     except ValueError:
         raise InvalidFileFormatException('Invalid i.s (sum) value')
 
 
-def process_i_ts(input):
-    """Return tax rate (i.ts) from input string."""
-    if input not in GOOD_TS_VALUES:
+def process_i_ts(input_value):
+    """Return tax rate (i.ts) from input_value string."""
+    if input_value not in GOOD_TS_VALUES:
         raise InvalidFileFormatException('Invalid i.ts (tax rate) value')
-    return input
+    return input_value
 
 
-def process_i_tv(input):
-    """Return tax amount (i.tv) from input string."""
+def process_i_tv(input_value):
+    """Return tax amount (i.tv) from input_value string."""
     try:
-        return float(input)  # TODO
+        return float(input_value)  # TODO
     except ValueError:
         raise InvalidFileFormatException('Invalid i.tv (tax amount) value')
 
 
-def process_i_sco(input):
-    """Return good type (i.sco) from input string."""
-    return input  # TODO
+def process_i_sco(input_value):
+    """Return good type (i.sco) from input_value string."""
+    return input_value  # TODO
 
 
-def get_row_reciept(input_row):
-    """Get reciept data and bill ID from row."""
+def get_row_receipt(input_row):
+    """Get receipt data and bill ID from row."""
     if len(input_row) < 15:
         raise InvalidFileFormatException('Invalid row width')
 
@@ -273,15 +273,33 @@ def get_row_good(input_row):
     }
 
 
+def get_file_type(input_file):
+    """Get file type from extension (xls, xlsx or csv) or `None`."""
+    suffix = pathlib.PurePath(input_file.name).suffix.lower()
+    if suffix == '.xls':
+        return 'xls'
+    if suffix == '.xlsx':
+        return 'xlsx'
+    if suffix == '.csv':
+        return 'csv'
+    return None
+
+
 def convert(input_file, input_file_type, output_file):
     """
-    Convert reciept entries.
+    Convert receipt entries.
 
     Input file should be in spreadsheet (according to `input_file_type`).
     Output file will be in JSON format.
     """
     if input_file_type is None:
-        raise InvalidFileFormatException('No input file')  # TODO
+        input_file_type = get_file_type(input_file)
+        if input_file_type is None:
+            raise click.exceptions.BadParameter(
+                'File type can not be detected', param='--input-file-type',
+                param_hint='--input-file-type'
+            )
+
     sheet = pyexcel.get_sheet(
         file_stream=input_file,
         file_type=input_file_type,
@@ -293,14 +311,14 @@ def convert(input_file, input_file_type, output_file):
     except StopIteration:
         raise InvalidFileFormatException('Input spreadsheet is empty')  # TODO
 
-    receipts = dict()
+    receipts = {}
     row_id = 2
     for row in rows:
         try:
             if isinstance(row[0], str):
                 if not row[0]:
                     break  # TODO
-            row_receipt, row_bill_id = get_row_reciept(row)
+            row_receipt, row_bill_id = get_row_receipt(row)
             if row_bill_id not in receipts:
                 receipts[row_bill_id] = row_receipt
             else:
@@ -325,38 +343,38 @@ def convert(input_file, input_file_type, output_file):
     )
 
 
-class FileTypeAction(argparse.Action):
-    """Argparse action to get input file type from file name."""
-
-    def __call__(
-        self, parser, namespace, values, option_string=None
-    ):  # noqa: D102
-        setattr(namespace, self.dest, values)
-        if getattr(namespace, 'input_file_type') is not None:
-            return
-        input_file_type = pathlib.PurePath(values.name).suffix[1:].lower()
-        setattr(namespace, 'input_file_type', input_file_type)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='Convert receipt data from spreadsheet format to JSON.'
-    )
-    parser.add_argument('--input-file', '-i', metavar='input', nargs='?',
-                        default=sys.stdin, action=FileTypeAction,
-                        type=argparse.FileType('rb'),
-                        help='input file (in XLS or CSV format')
-    parser.add_argument('--input-file-type', '-t', metavar='input_type',
-                        nargs='?', default=None,
-                        type=str, choices=['csv', 'xls', 'xlsx'],
-                        help='input file format (xls, xlsx or csv)')
-    parser.add_argument('--output-file', '-o', metavar='output', nargs='?',
-                        default=sys.stdout,
-                        type=argparse.FileType('wt'),
-                        help='output file (will be in JSON format)')
-    args = parser.parse_args()
+@click.command()
+@click.option(
+    '--input-file', type=click.File(mode='rb'), default=sys.stdin,
+    help='input file (in XLS or CSV format)'
+)
+@click.option(
+    '--input-file-type', type=click.Choice(['csv', 'xls', 'xlsx'], True),
+    help='input file format (xls, xlsx or csv)'
+)
+@click.option(
+    '--output-file', type=click.File(mode='wt'), default=sys.stdout,
+    help='output file (will be in JSON format)'
+)
+def main(input_file, input_file_type, output_file):
+    """
+    Convert receipt entries from spreadsheet to JSON file for 1C-Rarus.
+    """
+    if input_file_type is None:
+        input_file_type = get_file_type(input_file)
+        if input_file_type is None:
+            raise click.exceptions.BadParameter(
+                'File type can not be detected', param='--input-file-type',
+                param_hint='--input-file-type'
+            )
 
     try:
-        convert(args.input_file, args.input_file_type, args.output_file)
-    except InvalidFileFormatException as e:
-        print(f'Error: {e}', file=sys.stderr)  # TODO
+        convert(input_file, input_file_type, output_file)
+    except InvalidFileFormatException as exc:
+        click.secho(
+            f'File error: {exc}', err=True, file=sys.stdout, fg='red'
+        )
+
+
+if __name__ == '__main__':
+    main()

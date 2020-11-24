@@ -1,10 +1,10 @@
-# Скрипт для перевода данных о чеках из формата XLSX в JSON
+# Скрипт для перевода данных о чеках из формата XLSX в JSON для онлайн-кассы 1С-Рарус
 
 ## Инструкция по установке для 64-битной Windows
 
 ### Шаг 1
 
-Скачать установщик Python 3.7 или выше: [https://www.python.org/ftp/python/3.7.5/python-3.7.5-amd64.exe](https://www.python.org/ftp/python/3.7.5/python-3.7.5-amd64.exe)
+Скачать установщик Python 3.7 или выше: [Python 3.8](https://www.python.org/ftp/python/3.8.3/python-3.8.3-amd64.exe)
 
 ### Шаг 2
 
